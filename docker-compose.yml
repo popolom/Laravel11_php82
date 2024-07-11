@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+    web:
+        build: ./php82
+        container_name: "php82"
+        volumes:
+            - ./src:/workspace
+            - ./php82/000-default.conf:/etc/apache2/sites-available/000-default.conf
+        privileged: true
+        ports:
+            - "80:80"
+        depends_on:
+            - postgres
+    postgres:
+        build: 
+            context: ./postgres
+            args:
+                - DB_LANG=ja_JP
+        container_name: postgres
+        environment: 
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: testdb01
+        ports: 
+        - "5433:5432"
+        volumes:
+            - volume_postgres:/var/lib/postgresql/data
+            - ./postgres_service/initdb.d:/docker-entrypoint-initdb.d
+    pgadmin4:
+        image: dpage/pgadmin4
+        ports:
+            - 8888:80
+        volumes:
+            - volume_pgadmin:/var/lib/pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: postgres@example.com
+            PGADMIN_DEFAULT_PASSWORD: password
+        depends_on:
+        - postgres
+volumes:
+    volume_postgres:
+        name: vpg_php8
+    volume_pgadmin:
+        name: vpga_php8
